@@ -10,20 +10,21 @@ if (process.env.NODE_ENV === 'production' && JWT_SECRET === "attendance-secret-k
 }
 
 export interface JWTPayload {
-  userId: string | null
   id: number
   employee_id: string
   role: string
   name: string
   email: string
+  iat?: number
+  exp?: number
 }
 
 export function verifyToken(token: string): JWTPayload | null {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || "attendance-secret-key") as JWTPayload
+    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload
     return decoded
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
+    console.error("Token verification failed:", error)
     return null
   }
 }

@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono"
 import "./globals.css"
 import { AuthProvider } from "@/components/auth/auth-provider"
 import { ToastProvider, Toast } from "@/components/ui/toaster"
+import { Footer } from "@/components/layout/footer"
 
 export const metadata: Metadata = {
   title: "Attendance System",
@@ -30,7 +31,12 @@ html {
       </head>
       <body className="min-h-screen bg-background font-sans antialiased">
         <AuthProvider>
-          {children}
+          <div className="flex flex-col min-h-screen">
+            <main className="flex-1">
+              {children}
+            </main>
+            <Footer />
+          </div>
           <ToastProvider>
             <Toast />
           </ToastProvider>

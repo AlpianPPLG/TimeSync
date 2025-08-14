@@ -88,8 +88,9 @@ export function LeaveApproval() {
         toast("Pengajuan cuti telah disetujui")
         fetchLeaveRequests()
         setIsDetailOpen(false)
+        setSelectedRequest(null)
       } else {
-        toast("Gagal menyetujui pengajuan cuti")
+        toast(result.message || "Gagal menyetujui pengajuan cuti")
       }
     } catch (error) {
       toast("Terjadi kesalahan saat menyetujui cuti")
@@ -122,9 +123,10 @@ export function LeaveApproval() {
         toast("Pengajuan cuti telah ditolak")
         fetchLeaveRequests()
         setIsDetailOpen(false)
+        setSelectedRequest(null)
         setRejectionReason("")
       } else {
-        toast("Gagal menolak pengajuan cuti")
+        toast(result.message || "Gagal menolak pengajuan cuti")
       }
     } catch (error) {
       toast("Terjadi kesalahan saat menolak cuti")

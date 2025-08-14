@@ -102,6 +102,15 @@ export function LeaveRequestsTable({ showAllRequests = false, onRefresh }: Leave
         setSelectedRequest(null)
         setRejectionReason("")
         onRefresh?.()
+        
+        // Close any open dialogs
+        const dialogs = document.querySelectorAll('[data-state="open"]')
+        dialogs.forEach(dialog => {
+          const closeButton = dialog.querySelector('[data-slot="dialog-close"]')
+          if (closeButton) {
+            (closeButton as HTMLElement).click()
+          }
+        })
       } else {
         toast(result.message || "Terjadi kesalahan")
       }

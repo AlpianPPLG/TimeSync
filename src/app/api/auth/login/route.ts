@@ -41,7 +41,7 @@ export async function POST(req: Request) {
         name: user.name,
         email: user.email,
       },
-      process.env.JWT_SECRET || "attendance-secret-key",
+      process.env.JWT_SECRET || "attendance-secret-key", 
       { expiresIn: "24h" },
     )
 

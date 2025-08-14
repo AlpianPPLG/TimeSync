@@ -1,46 +1,23 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { jwtVerify } from "jose"
-import mysql from 'mysql2/promise'
 import pool from "@/lib/db"
-import { JWT_SECRET } from "@/lib/auth"
+import { requireAuth, requireRole } from "@/lib/auth"
 
 export async function POST(
   request: NextRequest, 
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  let connection: mysql.PoolConnection | null = null
   try {
-    const authHeader = request.headers.get("authorization")
-    if (!authHeader?.startsWith("Bearer ")) {
+    const user = requireAuth(request)
+    if (!user || !requireRole(user, ["admin"])) {
       return NextResponse.json(
-        { success: false, message: "Token tidak valid" },
-        { status: 401 }
+        { success: false, message: "Akses ditolak. Hanya admin yang diizinkan." },
+        { status: 403 }
       )
     }
 
-    const token = authHeader.split(" ")[1]
-    let userId: number
-    
-    try {
-      const { payload } = await jwtVerify(token, new TextEncoder().encode(JWT_SECRET))
-      
-      if (payload.role !== "admin") {
-        return NextResponse.json(
-          { success: false, message: "Akses ditolak. Hanya admin yang diizinkan." },
-          { status: 403 }
-        )
-      }
-      userId = Number(payload.sub)
-    } catch (error) {
-      console.error("Token verification error:", error)
-      return NextResponse.json(
-        { success: false, message: "Token tidak valid atau kadaluarsa" },
-        { status: 401 }
-      )
-    }
-
-    // Get the ID from the route parameters
-    const requestId = Number(context.params.id)
+    // Await params before using
+    const params = await context.params
+    const requestId = Number(params.id)
     if (isNaN(requestId)) {
       return NextResponse.json(
         { success: false, message: "ID pengajuan tidak valid" },
@@ -65,47 +42,15 @@ export async function POST(
       )
     }
 
-    try {
-      // Get a connection from the pool
-      connection = await pool.getConnection()
-      
-      // Start transaction
-      await connection.beginTransaction()
-
-      // First verify the user exists and has permission
-      const [userCheck] = await connection.execute(
-        'SELECT id FROM users WHERE id = ? LIMIT 1',
-        [userId]
-      )
-      
-      if (!Array.isArray(userCheck) || userCheck.length === 0) {
-        throw new Error('User not found')
-      }
-
-      // Update leave request status to approved
-      await connection.execute(
-        `UPDATE leave_requests 
-         SET status = 'approved', 
-             approved_by = ?, 
-             approved_at = NOW() 
-         WHERE id = ?`,
-        [userId, requestId]
-      )
-
-      // Here you could add logic to update user's leave balance if needed
-      // For example: await updateUserLeaveBalance(requests[0].user_id, requests[0].days_requested)
-
-      // Commit the transaction
-      await connection.commit()
-    } catch (error) {
-      // Rollback in case of error
-      if (connection) await connection.rollback()
-      console.error('Error approving leave request:', error)
-      throw error
-    } finally {
-      // Release the connection back to the pool
-      if (connection) connection.release()
-    }
+    // Update leave request status to approved
+    await pool.execute(
+      `UPDATE leave_requests 
+       SET status = 'approved', 
+           approved_by = ?, 
+           approved_at = NOW() 
+       WHERE id = ?`,
+      [user.id, requestId]
+    )
 
     return NextResponse.json({
       success: true,
