@@ -77,17 +77,21 @@ export function LeaveRequestsTable({ showAllRequests = false, onRefresh }: Leave
     setActionLoading(true)
     try {
       const token = localStorage.getItem("attendance_token")
-      const response = await fetch("/api/leave/approve", {
+      const endpoint = action === "approved" 
+        ? `/api/leave-requests/${requestId}/approve`
+        : `/api/leave-requests/${requestId}/reject`
+      
+      const body = action === "rejected" 
+        ? JSON.stringify({ rejection_reason: rejectionReason })
+        : null
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+          ...(body && { "Content-Type": "application/json" }),
         },
-        body: JSON.stringify({
-          leave_request_id: requestId,
-          action,
-          rejection_reason: action === "rejected" ? rejectionReason : null,
-        }),
+        ...(body && { body }),
       })
 
       const result = await response.json()
@@ -99,7 +103,7 @@ export function LeaveRequestsTable({ showAllRequests = false, onRefresh }: Leave
         setRejectionReason("")
         onRefresh?.()
       } else {
-        toast(result.message)
+        toast(result.message || "Terjadi kesalahan")
       }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {

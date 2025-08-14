@@ -7,6 +7,8 @@ import { Clock, Edit } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
+import { toast } from "sonner"
+
 export type DayType = "kerja" | "libur" | "cuti" | "izin"
 
 interface Schedule {
@@ -44,10 +46,20 @@ const dayTypeOptions = [
 export function ScheduleCalendar({ userId, onEdit, editable = false }: ScheduleCalendarProps) {
   const [schedules, setSchedules] = useState<Schedule[]>([])
   const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     fetchSchedule()
   }, [userId])
+
+  useEffect(() => {
+    // Check if user is admin
+    const userData = localStorage.getItem("attendance_user");
+    if (userData) {
+      const user = JSON.parse(userData);
+      setIsAdmin(user.role === "admin");
+    }
+  }, []);
 
   const fetchSchedule = async () => {
     try {
@@ -82,25 +94,51 @@ export function ScheduleCalendar({ userId, onEdit, editable = false }: ScheduleC
     try {
       const token = localStorage.getItem("attendance_token")
       if (!token) {
-        console.error("No authentication token found")
+        toast.error("Token autentikasi tidak ditemukan")
         return
       }
 
-      // Create a new array to avoid mutating the current state
-      let updatedSchedules = [...schedules]
-      const existingScheduleIndex = updatedSchedules.findIndex(s => s.day_of_week === dayKey)
+      // Check if user is admin before allowing changes
+      if (!isAdmin) {
+        toast.error("Hanya Admin Yang Dapat Edit")
+        return
+      }
 
-      if (existingScheduleIndex >= 0) {
-        // Update existing schedule
-        updatedSchedules[existingScheduleIndex] = {
-          ...updatedSchedules[existingScheduleIndex],
-          day_type: newDayType,
-          is_working_day: newDayType === "kerja"
+      // Optimistically update UI first
+      setSchedules(prev => {
+        const updated = [...prev]
+        const existingIndex = updated.findIndex(s => s.day_of_week === dayKey)
+        
+        if (existingIndex >= 0) {
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            day_type: newDayType,
+            is_working_day: newDayType === "kerja"
+          }
+        } else {
+          updated.push({
+            id: 0,
+            day_of_week: dayKey,
+            start_time: newDayType === "kerja" ? "09:00:00" : "00:00:00",
+            end_time: newDayType === "kerja" ? "17:00:00" : "00:00:00",
+            is_working_day: newDayType === "kerja",
+            day_type: newDayType
+          })
         }
-      } else {
-        // Add new schedule for the day
+        return updated
+      })
+
+      // Prepare data for API
+      const updatedSchedules = schedules.map(s => 
+        s.day_of_week === dayKey 
+          ? { ...s, day_type: newDayType, is_working_day: newDayType === "kerja" }
+          : s
+      )
+      
+      // Add new schedule if doesn't exist
+      if (!schedules.find(s => s.day_of_week === dayKey)) {
         updatedSchedules.push({
-          id: 0, // Will be set by the database
+          id: 0,
           day_of_week: dayKey,
           start_time: newDayType === "kerja" ? "09:00:00" : "00:00:00",
           end_time: newDayType === "kerja" ? "17:00:00" : "00:00:00",
@@ -116,7 +154,7 @@ export function ScheduleCalendar({ userId, onEdit, editable = false }: ScheduleC
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          userId: userId,
+          userId: userId || undefined,
           schedules: updatedSchedules.map(s => ({
             day_of_week: s.day_of_week,
             start_time: s.start_time,
@@ -129,17 +167,21 @@ export function ScheduleCalendar({ userId, onEdit, editable = false }: ScheduleC
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || "Failed to update schedule")
+        throw new Error(errorData.error || errorData.message || "Gagal memperbarui jadwal")
       }
 
-      // Update local state with the new schedules
-      setSchedules(updatedSchedules)
+      // Show success message
+      toast.success("Jadwal berhasil diperbarui!")
       
-      // Optional: Refresh from server to ensure consistency
-      await fetchSchedule()
+      // Refresh data from server
+      fetchSchedule()
+      
     } catch (error) {
       console.error("Error updating schedule:", error)
-      // You might want to show an error toast/notification to the user here
+      toast.error(error instanceof Error ? error.message : "Gagal memperbarui jadwal")
+      
+      // Revert optimistic update on error
+      fetchSchedule()
     }
   }
 
@@ -177,9 +219,19 @@ export function ScheduleCalendar({ userId, onEdit, editable = false }: ScheduleC
             Jadwal Kerja
           </CardTitle>
           {editable && (
-            <Button variant="outline" size="sm" onClick={onEdit}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                if (!isAdmin) {
+                  toast.error("Hanya Admin Yang Dapat Edit")
+                  return
+                }
+                onEdit?.()
+              }}
+            >
               <Edit className="h-4 w-4 mr-2" />
-              Edit Jadwal
+              Edit
             </Button>
           )}
         </div>
@@ -199,7 +251,7 @@ export function ScheduleCalendar({ userId, onEdit, editable = false }: ScheduleC
                     <Select
                       value={dayType}
                       onValueChange={(value) => handleDayTypeChange(day.key, value as DayType)}
-                      disabled={!editable}
+                      disabled={false}
                     >
                       <SelectTrigger className={`w-32 h-8 ${getDayTypeStyle(dayType)}`}>
                         <SelectValue />

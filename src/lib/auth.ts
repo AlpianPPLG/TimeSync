@@ -1,6 +1,14 @@
 import jwt from "jsonwebtoken"
 import type { NextRequest } from "next/server"
 
+// JWT Configuration
+export const JWT_SECRET = process.env.JWT_SECRET || "attendance-secret-key"
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "7d"
+
+if (process.env.NODE_ENV === 'production' && JWT_SECRET === "attendance-secret-key") {
+  console.warn('WARNING: Using default JWT secret in production. Please set JWT_SECRET environment variable.')
+}
+
 export interface JWTPayload {
   userId: string | null
   id: number

@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/components/auth/auth-provider"
-import { LayoutDashboard, Clock, Calendar, Users, Settings, LogOut, Menu, X, UserCheck, BarChart3 } from "lucide-react"
+import { LayoutDashboard, Clock, Calendar, Users, Settings, LogOut, Menu, X, UserCheck, BarChart3, HelpCircle } from "lucide-react"
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -14,6 +14,7 @@ const navigation = [
   { name: "Cuti", href: "/leave", icon: Calendar },
   { name: "Jadwal", href: "/schedule", icon: UserCheck },
   { name: "Laporan", href: "/reports", icon: BarChart3 },
+  { name: "FAQ & Dukungan", href: "/faq", icon: HelpCircle },
 ]
 
 const adminNavigation = [
@@ -97,7 +98,7 @@ export function Sidebar() {
           </nav>
 
           {/* Logout */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="mt-8 pt-4 border-t border-gray-200">
             <Button
               variant="ghost"
               className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"

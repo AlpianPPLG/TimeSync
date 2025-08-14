@@ -51,6 +51,11 @@ export default function SchedulePage() {
 
   const handleEditorSuccess = () => {
     setRefreshKey((prev) => prev + 1)
+    
+    // Show success notification
+    setTimeout(() => {
+      // This will be handled by the editor component
+    }, 100)
   }
 
   const isAdmin = user?.role === "admin"

@@ -16,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Users, Plus, Edit, Trash2, Search, ChevronLeft, ChevronRight } from "lucide-react"
 import type { User } from "@/lib/types"
+import { toast } from "sonner"
 
 const userSchema = z.object({
   employee_id: z.string().min(1, "Employee ID wajib diisi"),
@@ -50,9 +51,6 @@ export function UserManagement() {
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
-
-  const { toast } = useToast()
-
   const {
     register,
     handleSubmit,
@@ -115,26 +113,16 @@ export function UserManagement() {
       const result = await response.json()
 
       if (result.success) {
-        toast({
-          title: "Berhasil",
-          description: result.message,
-        })
+        toast.success(result.message || "User berhasil dibuat")
         setIsCreateOpen(false)
         reset()
         fetchUsers()
       } else {
-        toast({
-          title: "Gagal",
-          description: result.message,
-          variant: "destructive",
-        })
+        toast.error(result.message || "Gagal membuat user")
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Terjadi kesalahan koneksi",
-        variant: "destructive",
-      })
+      console.error("Error updating user:", error)
+      toast.error("Terjadi kesalahan koneksi")
     } finally {
       setActionLoading(false)
     }
@@ -158,27 +146,17 @@ export function UserManagement() {
       const result = await response.json()
 
       if (result.success) {
-        toast({
-          title: "Berhasil",
-          description: result.message,
-        })
+        toast.success(result.message || "User berhasil diperbarui")
         setIsEditOpen(false)
         setSelectedUser(null)
         reset()
         fetchUsers()
       } else {
-        toast({
-          title: "Gagal",
-          description: result.message,
-          variant: "destructive",
-        })
+        toast.error(result.message || "Gagal memperbarui user")
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Terjadi kesalahan koneksi",
-        variant: "destructive",
-      })
+      console.error("Error updating user:", error)
+      toast.error("Terjadi kesalahan koneksi")
     } finally {
       setActionLoading(false)
     }
@@ -200,24 +178,14 @@ export function UserManagement() {
       const result = await response.json()
 
       if (result.success) {
-        toast({
-          title: "Berhasil",
-          description: result.message,
-        })
+        toast.success(result.message || "User berhasil dihapus")
         fetchUsers()
       } else {
-        toast({
-          title: "Gagal",
-          description: result.message,
-          variant: "destructive",
-        })
+        toast.error(result.message || "Gagal menghapus user")
       }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Terjadi kesalahan koneksi",
-        variant: "destructive",
-      })
+      console.error("Error updating user:", error)
+      toast.error("Terjadi kesalahan koneksi")
     } finally {
       setActionLoading(false)
     }
@@ -525,7 +493,3 @@ export function UserManagement() {
     </Card>
   )
 }
-function useToast(): { toast: any } {
-  throw new Error("Function not implemented.")
-}
-

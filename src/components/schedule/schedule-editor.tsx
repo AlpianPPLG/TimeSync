@@ -110,6 +110,7 @@ export function ScheduleEditor({ open, onClose, userId, onSuccess }: ScheduleEdi
         start_time: schedule.start_time + ":00", // Add seconds
         end_time: schedule.end_time + ":00", // Add seconds
         day_type: schedule.day_type,
+        is_working_day: schedule.day_type === "kerja"
       }))
 
       const response = await fetch("/api/schedule", {
@@ -127,7 +128,11 @@ export function ScheduleEditor({ open, onClose, userId, onSuccess }: ScheduleEdi
       if (response.ok) {
         toast("Jadwal kerja berhasil disimpan")
         onSuccess?.()
-        onClose()
+        
+        // Auto close form after 1.5 seconds
+        setTimeout(() => {
+          onClose()
+        }, 1500)
       } else {
         const error = await response.json()
         toast(error.error || "Gagal menyimpan jadwal")

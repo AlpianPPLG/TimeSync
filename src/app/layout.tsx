@@ -28,7 +28,7 @@ html {
 }
         `}</style>
       </head>
-      <body>
+      <body className="min-h-screen bg-background font-sans antialiased">
         <AuthProvider>
           {children}
           <ToastProvider>
