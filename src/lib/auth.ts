@@ -23,9 +23,16 @@ export function verifyToken(token: string): JWTPayload | null {
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload
     return decoded
-  } catch (error) {
-    console.error("Token verification failed:", error)
-    return null
+  } catch (error: any) {
+    if (error.name === 'TokenExpiredError') {
+      console.error('Token expired at:', error.expiredAt);
+      // We still return null for expired tokens, but we've logged the exact expiry time
+    } else if (error.name === 'JsonWebTokenError') {
+      console.error('Invalid token:', error.message);
+    } else {
+      console.error('Token verification failed:', error);
+    }
+    return null;
   }
 }
 
