@@ -5,14 +5,15 @@ import { requireAuth, requireRole } from "@/lib/auth"
 import type { NextRequest } from "next/server"
 import bcrypt from "bcryptjs"
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = requireAuth(request)
     if (!user || !requireRole(user, ["admin"])) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
     }
 
-    const userId = Number.parseInt(params.id)
+    const { id } = await params
+    const userId = Number.parseInt(id)
     const { employee_id, name, email, password, role, department, position, phone, address, is_active } =
       await request.json()
 
@@ -60,14 +61,15 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = requireAuth(request)
     if (!user || !requireRole(user, ["admin"])) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
     }
 
-    const userId = Number.parseInt(params.id)
+    const { id } = await params
+    const userId = Number.parseInt(id)
 
     // Check if user exists
     const [existingUser]: any = await pool.query("SELECT id FROM users WHERE id = ? LIMIT 1", [userId])

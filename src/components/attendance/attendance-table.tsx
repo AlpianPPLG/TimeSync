@@ -87,7 +87,7 @@ export function AttendanceTable({ userId, showUserInfo = false }: AttendanceTabl
     return <Badge variant={config.variant}>{config.label}</Badge>
   }
 
-  const formatTime = (time: string | null) => {
+  const formatTime = (time: string | null | undefined) => {
     if (!time) return "-"
     return format(new Date(`2000-01-01 ${time}`), "HH:mm")
   }

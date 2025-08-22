@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import pool from "@/lib/db"
 import { verifyToken } from "@/lib/auth"
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const token = request.headers.get("authorization")?.replace("Bearer ", "")
     if (!token) {
@@ -15,8 +15,9 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       return NextResponse.json({ error: "Invalid token" }, { status: 401 })
     }
 
+    const { id } = await params
     const { day_type, is_working_day, start_time, end_time } = await request.json()
-    const scheduleId = params.id
+    const scheduleId = id
 
     const [result] = await pool.execute(
       `UPDATE work_schedules 
