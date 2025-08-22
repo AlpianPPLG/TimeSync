@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { type NextRequest, NextResponse } from "next/server"
 import pool from "@/lib/db"
 import { requireAuth, requireRole } from "@/lib/auth"

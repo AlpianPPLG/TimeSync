@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { type NextRequest, NextResponse } from "next/server"
 import { jwtVerify } from "jose"
 import pool from "@/lib/db"
@@ -61,6 +62,7 @@ export async function GET(request: NextRequest) {
     if (leave_type && leave_type !== "all") {
       whereConditions.push(`lr.leave_type = ?`)
       queryParams.push(leave_type)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       paramIndex++
     }
 

@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     }
 
     // Send email using Resend
-    const { data, error } = await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: 'onboarding@resend.dev', // Replace with your verified domain in Resend
       to: 'nova07pplg@gmail.com',
       replyTo: email,

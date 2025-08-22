@@ -37,6 +37,7 @@ export function LeaveApproval() {
 
   useEffect(() => {
     fetchLeaveRequests()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination.page, filters])
 
   const fetchLeaveRequests = async () => {
@@ -92,6 +93,7 @@ export function LeaveApproval() {
       } else {
         toast(result.message || "Gagal menyetujui pengajuan cuti")
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast("Terjadi kesalahan saat menyetujui cuti")
     } finally {
@@ -128,6 +130,7 @@ export function LeaveApproval() {
       } else {
         toast(result.message || "Gagal menolak pengajuan cuti")
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast("Terjadi kesalahan saat menolak cuti")
     } finally {

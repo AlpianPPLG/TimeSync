@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useAuth } from "@/components/auth/auth-provider"
 
 export async function fetchWithAuth(

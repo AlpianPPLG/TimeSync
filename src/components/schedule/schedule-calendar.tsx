@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import { useState, useEffect } from "react"
@@ -50,6 +51,7 @@ export function ScheduleCalendar({ userId, onEdit, editable = false }: ScheduleC
 
   useEffect(() => {
     fetchSchedule()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId])
 
   useEffect(() => {

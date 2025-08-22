@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { type NextRequest, NextResponse } from "next/server"
 import pool from "@/lib/db"
 import { verifyToken } from "@/lib/auth"

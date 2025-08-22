@@ -11,7 +11,7 @@ export async function sendContactEmail(formData: FormData) {
   const message = formData.get('message') as string
 
   try {
-    const { data, error } = await resend.emails.send({
+    const { error } = await resend.emails.send({
       from: 'onboarding@resend.dev', // This should be a verified domain in your Resend account
       to: 'nova07pplg@gmail.com',
       subject: `[Dukungan] ${subject}`,
